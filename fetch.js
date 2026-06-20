@@ -24,15 +24,15 @@ async function fetchImages({
 
 // Source waifu.im.
 // https://docs.waifu.im/docs/intro
-function fetchWaifuIm() {
-  return fetchImages({
-    url: `https://api.waifu.im/images?pagesize=${limit}`,
-    getItems: (data) => data?.items,
-    getImageUrl: (post) => post.url,
-    getPageUrl: (post) => `https://waifu.im/images/${post.id}`,
-    getId: (post) => post.id,
-  })
-}
+// function fetchWaifuIm() {
+//   return fetchImages({
+//     url: `https://api.waifu.im/images?pagesize=${limit}`,
+//     getItems: (data) => data?.items,
+//     getImageUrl: (post) => post.url,
+//     getPageUrl: (post) => `https://waifu.im/images/${post.id}`,
+//     getId: (post) => post.id,
+//   })
+// }
 
 // Source danbooru.
 // https://danbooru.donmai.us/wiki_pages/help:api
@@ -132,7 +132,7 @@ function mergeInto(store, sourceName, newItems) {
 
 async function main() {
   const sources = [
-    { name: 'waifu.im', fetcher: fetchWaifuIm },
+    // { name: 'waifu.im', fetcher: fetchWaifuIm },
     // { name: 'danbooru', fetcher: fetchDanbooru },
     // { name: 'safebooru', fetcher: fetchSafebooru },
     { name: 'yande.re', fetcher: fetchYandere },
