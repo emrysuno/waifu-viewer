@@ -40,8 +40,14 @@ function render() {
   for (const pick of picks) {
     const link = document.createElement('a')
     link.href = pick.pageUrl || pick.url
-    link.target = '_blank'
     link.rel = 'noopener noreferrer'
+    link.addEventListener('click', (e) => {
+      e.preventDefault(); // Stops left-click from opening the link
+    });
+    link.addEventListener('contextmenu', (e) => {
+      e.preventDefault(); // Stops the browser's right-click menu
+      window.open(pick.pageUrl || pick.url, '_blank', 'noopener,noreferrer');
+    });
 
     const img = document.createElement('img')
     img.src = pick.url

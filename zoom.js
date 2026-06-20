@@ -59,11 +59,12 @@
     document.body.style.overflow = ''
   }
 
-  function onContextMenu(e) {
+  function onClick(e) {
     const img = e.target.closest('#gallery img')
     if (!img) return
-    e.preventDefault()
-    openZoom(img.currentSrc || img.src, img.alt)
+    // No e.preventDefault() needed here if you already blocked it on the link, 
+      // but it doesn't hurt to keep it to be safe.
+      openZoom(img.currentSrc || img.src, img.alt)
   }
 
   function onKeydown(e) {
@@ -72,6 +73,6 @@
 
   // Event delegation: works even though the gallery's <img> elements
   // are created dynamically by app.js after this script loads.
-  document.addEventListener('contextmenu', onContextMenu)
+  document.addEventListener('click', onClick)
   document.addEventListener('keydown', onKeydown)
 })()
