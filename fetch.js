@@ -103,16 +103,16 @@ function fetchKonachannet() {
 
 // Source zerochan.
 // https://www.zerochan.net/api
-function fetchZerochan() {
-  return fetchImages({
-    url: `https://www.zerochan.net/?json&l=${limit}`,
-    getItems: (data) => data?.items,
-    getImageUrl: (post) => post.thumbnail,
-    getAlt: (post) => post.tag,
-    getPageUrl: (post) => `https://www.zerochan.net/${post.id}`,
-    getId: (post) => post.id,
-  })
-}
+// function fetchZerochan() {
+//   return fetchImages({
+//     url: `https://www.zerochan.net/?json&l=${limit}`,
+//     getItems: (data) => data?.items,
+//     getImageUrl: (post) => post.thumbnail,
+//     getAlt: (post) => post.tag,
+//     getPageUrl: (post) => `https://www.zerochan.net/${post.id}`,
+//     getId: (post) => post.id,
+//   })
+// }
 
 // Load existing JSON store, if any, so we can merge instead of overwrite.
 async function loadExisting() {
@@ -140,7 +140,7 @@ async function main() {
     { name: 'yande.re', fetcher: fetchYandere },
     // { name: 'konachancom', fetcher: fetchKonachancom },
     { name: 'konachannet', fetcher: fetchKonachannet },
-    { name: 'zerochan', fetcher: fetchZerochan },
+    // { name: 'zerochan', fetcher: fetchZerochan },
   ]
   const store = await loadExisting()
   for (const { name, fetcher } of sources) {
