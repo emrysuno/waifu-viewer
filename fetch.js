@@ -7,18 +7,18 @@ async function fetchImages({
   url, // full request url
   getItems, // (data) => array of items
   getImageUrl, // (item) => image url string
-  getAlt, // (item) => alt text string
   getPageUrl, // (item) => original page url string
   getId, // (item) => unique id for this item
+  getExtraFields, // (item) => optiona object with extra fields
 } = {}) {
   const res = await fetch(url)
   const data = await res.json()
   const items = getItems(data) || []
   return items.map(item => ({
     url: getImageUrl(item),
-    alt: getAlt ? getAlt(item) : 'image',
     pageUrl: getPageUrl ? getPageUrl(item) : null,
     id: String(getId(item)),
+    ...(getExtraFields ? getExtraFields(item) : {})
   }))
 }
 
@@ -29,7 +29,6 @@ function fetchWaifuIm() {
     url: `https://api.waifu.im/images?pagesize=${limit}`,
     getItems: (data) => data?.items,
     getImageUrl: (post) => post.url,
-    getAlt: (post) => post.tags?.[0]?.name,
     getPageUrl: (post) => `https://waifu.im/images/${post.id}`,
     getId: (post) => post.id,
   })
@@ -67,25 +66,23 @@ function fetchYandere() {
     url: `https://yande.re/post.json?limit=${limit}`,
     getItems: (data) => data,
     getImageUrl: (post) => post.file_url,
-    getAlt: (post) => post.tag_string_character,
     getPageUrl: (post) => `https://yande.re/post/show/${post.id}`,
     getId: (post) => post.id,
+    getExtraFields: (post) => ({ sample_url: post.sample_url || null })
   })
 }
 
 // # Source konachan.com (NSFW version).
 // # https://konachan.com/help/api
-// KONACHAN_COM_URL="https://konachan.com/post.json"
-// # curl -s "${KONACHAN_COM_URL}?limit=${COUNT}"
-function fetchKonachancom() {
-  return fetchImages({
-    url: `https://konachan.com/post.json?limit=${limit}`,
-    getItems: (data) => data,
-    getImageUrl: (post) => post.file_url,
-    getAlt: (post) => post.author,
-    getPageUrl: (post) => `https://konachan.com/post/show/${post.id}`,
-  })
-}
+// function fetchKonachancom() {
+//   return fetchImages({
+//     url: `https://konachan.com/post.json?limit=${limit}`,
+//     getItems: (data) => data,
+//     getImageUrl: (post) => post.file_url,
+//     getAlt: (post) => post.author,
+//     getPageUrl: (post) => `https://konachan.com/post/show/${post.id}`,
+//   })
+// }
 
 // # Source konachan.net (SFW version).
 // # https://konachan.net/help/api
@@ -95,9 +92,9 @@ function fetchKonachannet() {
     url: `https://konachan.net/post.json?limit=${limit}`,
     getItems: (data) => data,
     getImageUrl: (post) => post.file_url,
-    getAlt: (post) => post.author,
     getPageUrl: (post) => `https://konachan.net/post/show/${post.id}`,
     getId: (post) => post.id,
+    getExtraFields: (post) => ({ sample_url: post.sample_url || null })
   })
 }
 
@@ -128,7 +125,8 @@ async function loadExisting() {
 function mergeInto(store, sourceName, newItems) {
   if (!store[sourceName]) store[sourceName] = {}
   for (const item of newItems) {
-    store[sourceName][item.id] = item
+    const { id, ...itemWithoutId } = item
+    store[sourceName][id] = itemWithoutId
   }
 }
 
