@@ -141,11 +141,15 @@ async function main() {
     // { name: 'zerochan', fetcher: fetchZerochan },
   ]
   const store = await loadExisting()
+  const totalBefore = Object.values(store).reduce(
+    (sum, bySource) => sum + Object.keys(bySource).length, 0
+  )
+
   for (const { name, fetcher } of sources) {
     try {
       const items = await fetcher()
       mergeInto(store, name, items)
-      console.log(`fetched ${items.length} item(s) frmo ${name}`)
+      console.log(`fetched ${items.length} item(s) from ${name}`)
     } catch (err) {
       console.error(`failed to fetch from ${name}`, err.message)
     }
@@ -154,10 +158,10 @@ async function main() {
     window.IMAGE_STORE = ${JSON.stringify(store, null, 2)}
   `
   fs.writeFileSync(DATA_FILE, fileContents)
-  const total = Object.values(store).reduce(
+  const totalAfter = Object.values(store).reduce(
     (sum, bySource) => sum + Object.keys(bySource).length,
     0
   )
-  console.log(`store now has ${total} total image(s) across ${Object.keys(store).length} source(s)`)
+  console.log(`store now has ${totalAfter - totalBefore} more image(s) across ${Object.keys(store).length} source(s) totalling ${totalAfter}`)
 }
 main()
