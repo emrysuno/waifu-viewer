@@ -10,4 +10,5 @@ the amount of waifus on screen
 refresh the page to randomize waifus
 
 
-click on waifu to open source
+left click on waifu to open source
+right click to zoom the image to fullscreen, then click anywhere to unzoom
