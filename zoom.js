@@ -60,6 +60,8 @@
   }
 
   function onClick(e) {
+    // NOTE: MOBILE WIDTH
+    if (window.innerWidth <= 768) return
     const img = e.target.closest('#gallery img')
     if (!img) return
     // No e.preventDefault() needed here if you already blocked it on the link, 
