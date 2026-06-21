@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Waifu Fetcher</title>
+  <title>Waifu Viewer</title>
   <style>
     body {
       background: #121212;
@@ -16,13 +16,36 @@
       column-gap: 4px;
       box-sizing: border-box;
     }
-    #gallery img {
-      width: 100%;
+    /* The tile (<a>) owns the size and the placeholder color. It's sized
+       via aspect-ratio the moment it's created, before the image has
+       loaded, so the gallery layout is stable from the very first paint. */
+    #gallery .tile {
       display: block;
+      width: 100%;
       margin-bottom: 4px;
       break-inside: avoid;
+      overflow: hidden;
+      position: relative;
     }
-
+    #gallery .tile img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    /* Only fade the real image in once it has actually finished loading.
+       Until then the tile's background color shows through. */
+    #gallery .tile img.loaded {
+      opacity: 1;
+    }
+    /* If the image fails to load, hide it entirely so no alt text or
+       broken-image icon ever appears (and so nothing resizes) — the
+       colored placeholder just stays as-is. */
+    #gallery .tile.failed img {
+      display: none;
+    }
     /* NOTE: MOBILE WIDTH */
     @media (max-width: 768px) {
     }
