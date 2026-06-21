@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Configuration
+IMAGE_JS="image.js"
+TEMP_WALLPAPER="/tmp/current_wallpaper"
+
+# Check if required tools are installed
+for cmd in jq curl feh; do
+  if ! command -v "$cmd" &> /dev/null; then
+    echo "Error: $cmd is not installed." >&2
+    exit 1
+  fi
+done
+
+if [ ! -f "$IMAGE_JS" ]; then
+  echo "Error: $IMAGE_JS not found in the current directory." >&2
+  exit 1
+fi
+
+URL=$(sed -n '/window.IMAGE_STORE/,$p' "$IMAGE_JS" \
+  | sed '1s/^.*window.IMAGE_STORE = //' \
+  | jq -r '
+      .[][]
+      | select(.width != null and .height != null and .width > .height)
+      | .sample_url
+    ' | shuf -n 1)
+
+if [ -z "$URL" ] || [ "$URL" = "null" ]; then
+  echo "No landscape images found or failed to parse JSON."
+  exit 1
+fi
+
+echo "Selected landscape wallpaper: $URL"
+
+# Download the image safely (using no-referrer as your frontend does)
+echo "Downloading image..."
+# curl -s -A "Mozilla/5.0" --referer "no-referrer" "$URL" -o "$TEMP_WALLPAPER"
+curl -sL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" \
+  -e "https://yande.re/" \
+  "$URL" -o "$TEMP_WALLPAPER"
+
+if [ $? -eq 0 ]; then
+  # Set the wallpaper using feh (bg-fill scales and crops to fit seamlessly)
+  feh --bg-fill "$TEMP_WALLPAPER"
+  echo "Wallpaper updated successfully!"
+else
+  echo "Failed to download the image."
+  exit 1
+fi
