@@ -6,54 +6,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Waifu Viewer</title>
   <style>
-    body {
+    html, body {
       background: #121212;
       color: #e0e0e0;
       margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
     }
+    /* The gallery is the full viewport. Every tile inside it is absolutely
+       positioned by app.js using px coordinates computed from a recursive
+       (BSP) split of the viewport, so there's never any leftover gap and
+       never any scroll. */
     #gallery {
-      column-count: 8;
-      column-gap: 4px;
-      box-sizing: border-box;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
     }
-    /* The tile (<a>) owns the size and the placeholder color. It's sized
-       via aspect-ratio the moment it's created, before the image has
-       loaded, so the gallery layout is stable from the very first paint. */
     #gallery .tile {
       display: block;
-      width: 100%;
-      margin-bottom: 4px;
-      break-inside: avoid;
       overflow: hidden;
-      position: relative;
+      box-sizing: border-box;
     }
     #gallery .tile img {
       width: 100%;
       height: 100%;
       display: block;
-      object-fit: cover;
+      object-fit: cover; /* default; app.js overrides to "contain" per-tile when cropping would be too severe */
       opacity: 0;
       transition: opacity 0.25s ease;
     }
-    /* Only fade the real image in once it has actually finished loading.
-       Until then the tile's background color shows through. */
     #gallery .tile img.loaded {
       opacity: 1;
     }
-    /* If the image fails to load, hide it entirely so no alt text or
-       broken-image icon ever appears (and so nothing resizes) — the
-       colored placeholder just stays as-is. */
     #gallery .tile.failed img {
       display: none;
-    }
-    /* NOTE: MOBILE WIDTH */
-    @media (max-width: 768px) {
     }
   </style>
 </head>
 <body>
 
-  <div id="gallery"> </div>
+  <div id="gallery"></div>
   <script src="image.js"></script>
   <script src="app.js"></script>
   <script src="zoom.js"></script>
