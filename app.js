@@ -50,7 +50,7 @@ function render() {
     });
 
     const img = document.createElement('img')
-    img.src = pick.url
+    img.src = pick.sample_url || pick.url
     img.alt = pick.alt || pick.source || 'image'
     img.referrerPolicy = 'no-referrer'
 
