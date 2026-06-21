@@ -1,7 +1,7 @@
 import fs from 'fs'
 
 const DATA_FILE = 'image.js'
-const limit = 1000
+const limit = 10000000
 
 async function fetchImages({
   url, // full request url
@@ -11,7 +11,17 @@ async function fetchImages({
   getId, // (item) => unique id for this item
   getExtraFields, // (item) => optiona object with extra fields
 } = {}) {
-  const res = await fetch(url)
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Accept': 'application/json',
+    },
+  })
+  const contentType = res.headers.get('content-type') || ''
+  if (!res.ok || !contentType.includes('json')) {
+    const body = await res.text()
+    throw new Error( `request to ${url} failed: status ${res.status}, content-type "${contentType}", body starts with: ${body.slice(0, 200)}`)
+  }
   const data = await res.json()
   const items = getItems(data) || []
   return items.map(item => ({
@@ -24,40 +34,40 @@ async function fetchImages({
 
 // Source waifu.im.
 // https://docs.waifu.im/docs/intro
-// function fetchWaifuIm() {
-//   return fetchImages({
-//     url: `https://api.waifu.im/images?pagesize=${limit}`,
-//     getItems: (data) => data?.items,
-//     getImageUrl: (post) => post.url,
-//     getPageUrl: (post) => `https://waifu.im/images/${post.id}`,
-//     getId: (post) => post.id,
-//   })
-// }
+function fetchWaifuIm() {
+  return fetchImages({
+    url: `https://api.waifu.im/images?pagesize=${limit}`,
+    getItems: (data) => data?.items,
+    getImageUrl: (post) => post.url,
+    getPageUrl: (post) => `https://waifu.im/images/${post.id}`,
+    getId: (post) => post.id,
+  })
+}
 
 // Source danbooru.
 // https://danbooru.donmai.us/wiki_pages/help:api
-// function fetchDanbooru() {
-//   return fetchImages({
-//     url: `https://danbooru.donmai.us/posts.json?limit=${limit}`,
-//     getItems: (data) => data,
-//     getImageUrl: (post) => post.file_url,
-//     getAlt: (post) => post.tag_string_character,
-//     getPageUrl: (post) => `https://danbooru.donmai.us/posts/${post.id}`,
-//     getId: (post) => post.id,
-//   })
-// }
+function fetchDanbooru() {
+  return fetchImages({
+    url: `https://danbooru.donmai.us/posts.json?limit=${limit}`,
+    getItems: (data) => data,
+    getImageUrl: (post) => post.file_url,
+    getAlt: (post) => post.tag_string_character,
+    getPageUrl: (post) => `https://danbooru.donmai.us/posts/${post.id}`,
+    getId: (post) => post.id,
+  })
+}
 
 // Source safebooru.
 // https://safebooru.org/index.php?page=help&topic=dapi
-// function fetchSafebooru() {
-//   return fetchImages({
-//     url: `https://safebooru.org/index.php?json=1&page=dapi&s=post&q=index&limit=${limit}`,
-//     getItems: (data) => data,
-//     getImageUrl: (post) => post.file_url,
-//     getAlt: (post) => post.tag_string_character,
-//     getPageUrl: (post) => `https://danbooru.donmai.us/posts/${post.id}`,
-//   })
-// }
+function fetchSafebooru() {
+  return fetchImages({
+    url: `https://safebooru.org/index.php?json=1&page=dapi&s=post&q=index&limit=${limit}`,
+    getItems: (data) => data,
+    getImageUrl: (post) => post.file_url,
+    getAlt: (post) => post.tag_string_character,
+    getPageUrl: (post) => `https://danbooru.donmai.us/posts/${post.id}`,
+  })
+}
 
 // Source yande.re.
 // https://yande.re/help/api
@@ -80,15 +90,15 @@ function fetchYandere() {
 
 // # Source konachan.com (NSFW version).
 // # https://konachan.com/help/api
-// function fetchKonachancom() {
-//   return fetchImages({
-//     url: `https://konachan.com/post.json?limit=${limit}`,
-//     getItems: (data) => data,
-//     getImageUrl: (post) => post.file_url,
-//     getAlt: (post) => post.author,
-//     getPageUrl: (post) => `https://konachan.com/post/show/${post.id}`,
-//   })
-// }
+function fetchKonachancom() {
+  return fetchImages({
+    url: `https://konachan.com/post.json?limit=${limit}`,
+    getItems: (data) => data,
+    getImageUrl: (post) => post.file_url,
+    getAlt: (post) => post.author,
+    getPageUrl: (post) => `https://konachan.com/post/show/${post.id}`,
+  })
+}
 
 // # Source konachan.net (SFW version).
 // # https://konachan.net/help/api
@@ -112,16 +122,23 @@ function fetchKonachannet() {
 
 // Source zerochan.
 // https://www.zerochan.net/api
-// function fetchZerochan() {
-//   return fetchImages({
-//     url: `https://www.zerochan.net/?json&l=${limit}`,
-//     getItems: (data) => data?.items,
-//     getImageUrl: (post) => post.thumbnail,
-//     getAlt: (post) => post.tag,
-//     getPageUrl: (post) => `https://www.zerochan.net/${post.id}`,
-//     getId: (post) => post.id,
-//   })
-// }
+function fetchZerochan() {
+  return fetchImages({
+    url: `https://www.zerochan.net/?json&l=${limit}`,
+    getItems: (data) => data?.items,
+    getImageUrl: (post) => post.thumbnail,
+    getAlt: (post) => post.tag,
+    getPageUrl: (post) => `https://www.zerochan.net/${post.id}`,
+    getId: (post) => post.id,
+    getExtraFields: (post) => ({
+      width: post.width || 0,
+      height: post.height || 0,
+      sample_url: post.sample_url || null,
+      sample_width: post.sample_url ? (post.sample_width || 0) : 0,
+      sample_height: post.sample_url ? (post.sample_height || 0) : 0,
+    })
+  })
+}
 
 // Load existing JSON store, if any, so we can merge instead of overwrite.
 async function loadExisting() {
@@ -144,13 +161,13 @@ function mergeInto(store, sourceName, newItems) {
 
 async function main() {
   const sources = [
-    // { name: 'waifu.im', fetcher: fetchWaifuIm },
-    // { name: 'danbooru', fetcher: fetchDanbooru },
-    // { name: 'safebooru', fetcher: fetchSafebooru },
+    // { name: 'waifu.im', fetcher: fetchWaifuIm }, // meh source
+    // { name: 'danbooru', fetcher: fetchDanbooru }, // idk
+    // { name: 'safebooru', fetcher: fetchSafebooru }, // can't fetch
     { name: 'yande.re', fetcher: fetchYandere },
-    // { name: 'konachancom', fetcher: fetchKonachancom },
+    // { name: 'konachancom', fetcher: fetchKonachancom }, // can't fetch
     { name: 'konachannet', fetcher: fetchKonachannet },
-    // { name: 'zerochan', fetcher: fetchZerochan },
+    // { name: 'zerochan', fetcher: fetchZerochan }, // doesn't provide high quality image, only thumbnails
   ]
   const store = await loadExisting()
   const totalBefore = Object.values(store).reduce(
