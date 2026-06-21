@@ -68,7 +68,13 @@ function fetchYandere() {
     getImageUrl: (post) => post.file_url,
     getPageUrl: (post) => `https://yande.re/post/show/${post.id}`,
     getId: (post) => post.id,
-    getExtraFields: (post) => ({ sample_url: post.sample_url || null })
+    getExtraFields: (post) => ({
+      width: post.width || 0,
+      height: post.height || 0,
+      sample_url: post.sample_url || null,
+      sample_width: post.sample_url ? (post.sample_width || 0) : 0,
+      sample_height: post.sample_url ? (post.sample_height || 0) : 0,
+    })
   })
 }
 
@@ -94,7 +100,13 @@ function fetchKonachannet() {
     getImageUrl: (post) => post.file_url,
     getPageUrl: (post) => `https://konachan.net/post/show/${post.id}`,
     getId: (post) => post.id,
-    getExtraFields: (post) => ({ sample_url: post.sample_url || null })
+    getExtraFields: (post) => ({
+      width: post.width || 0,
+      height: post.height || 0,
+      sample_url: post.sample_url || null,
+      sample_width: post.sample_url ? (post.sample_width || 0) : 0,
+      sample_height: post.sample_url ? (post.sample_height || 0) : 0,
+    })
   })
 }
 
